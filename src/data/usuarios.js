@@ -1,0 +1,52 @@
+export const Usuarios = [
+    {
+      id: "1",
+      nombre: "Simon",
+      apellido: "Perez",
+      fecha_nacimiento:"02/09/1997",
+      edad:24,
+      email: "juan@gmail.com",
+      password: "123",
+      rol:"Estudiante",
+    },
+    {
+      id: "2",
+      nombre: "Marta",
+      apellido: "Gomez",
+      fecha_nacimiento:"12/01/1995",
+      edad:26,
+      email: "margomez@gmail.com",
+      password: "mar123",
+      rol:"Lider",
+    },
+    {
+      id: "3",
+      nombre: "Jorge",
+      apellido: "Casas",
+      fecha_nacimiento:"22/05/1990",
+      edad:31,
+      email: "jorca@gmail.com",
+      password: "jor123",
+      rol:"Profesor",
+    },
+    {
+      id: "4",
+      nombre: "Karla",
+      apellido: "Ramirez",
+      fecha_nacimiento:"23/11/1996",
+      edad:26,
+      email: "karra@gmail.com",
+      password: "123",
+      rol:"Administratdor",
+    },
+    {
+        nombre:"Marlon",
+        apellido:"Cruz",
+        fecha_nacimiento:"16/08/1985",
+        edad:36,
+        email:"marcruz@gmail.com",
+        password:"ma123",
+        rol:"Profesor",
+    
+    }
+  ];
