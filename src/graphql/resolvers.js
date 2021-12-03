@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt';
 import { generarJwt } from "../helpers/jwt";
 import Proyecto from "../models/Proyecto";
 
+
 export const resolvers = {
 
     Query: {
@@ -40,6 +41,10 @@ export const resolvers = {
             }
 
         },
+
+        Usuarios(){
+            return Usuario.find()
+        }
 
     },
     Mutation: {

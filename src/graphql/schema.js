@@ -5,7 +5,8 @@ const typeDefs = `
 
     type Query {
         login(email: String!, password: String!): String,
-        proyectos: [Proyecto]
+        proyectos: [Proyecto],
+        Usuarios : [Usuario]
     }
     
     type Mutation {
