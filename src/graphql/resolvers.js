@@ -41,9 +41,20 @@ export const resolvers = {
             }
 
         },
+       
+       async Usuarios(_,{rol}){
+            if(rol === "Administrador"){
+                return await  Usuario.find()
+            }
+            else{
+                return null
+            }
+            
+        },
 
-        Usuarios(){
-            return Usuario.find()
+        Estudiantes(){
+            return Usuario.find({rol : "Estudiante"})
+            
         }
 
     },
@@ -65,23 +76,58 @@ export const resolvers = {
 
         async agregarProyecto(_, { input }) {
 
-            // Cuando es un unico lenguaje:
-
-            // const curso = new Curso({
-            //     nombre: input.nombre,
-            //     lenguaje: input.lenguaje,
-            //     fecha: input.fecha,
-
-            //     // profesorId : args.profesorId
-            //   });
-
-            // Cuando es un arreglo de lenguajes:
+            
 
             const proyecto = new Proyecto(input);
 
             return await proyecto.save();
 
-            // return input;
+           
         },
+
+       async actualizarUsuario(parent,args){
+
+           const salt = bcrypt.genSaltSync();
+           let user = await Usuario.findById(args.id)
+           return await Usuario.findByIdAndUpdate(args.id,{
+               nombre : args.nombre,
+               email: args.email,
+               cc: args.cc,
+               rol: args.rol,
+               password: args.password = bcrypt.hashSync(args.password, salt)
+           }, {new:true})
+       },
+
+       async actualizarEstadoUser(parent,args){
+           const user = await Usuario.findById(args.id)
+           if(args.rol === "Admistrador"){
+               return await Usuario.findByIdAndUpdate(args.id,{
+                   estado: args.estado
+               },{new:true})
+           }else{
+               return null
+           }
+       },
+       async actualizarEstadoEstudiante(parent,args){
+           const estudiante = await Usuario.findById(args.id)
+           if(args.rol=="Lider"){
+               if(estudiante.rol === "Estudiante"){
+                return await Usuario.findByIdAndUpdate(args.id,{
+                    estado: args.estado
+
+               },{new:true})
+               
+               }
+           }
+           else{
+               return null
+           }
+       }
+       
+       
+        
+        
+       
+        
     }
 };
