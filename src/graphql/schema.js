@@ -64,6 +64,23 @@ const typeDefs = `
         lider: ID
     }
 
+    type Inscripcion {
+        id: ID,
+        proyecto_id: ID.
+        usuario_id: ID,
+        estado: String,
+        fechaIngreso: String,
+        fechaEgreso: String 
+    }
+
+    input InscripcionInput {
+        proyecto_id: ID.
+        usuario_id: ID,
+        estado: String,
+        fechaIngreso: String,
+        fechaEgreso: String 
+    }
+
 `;
 
 // Query en GraphQL SIN arreglo de lenguaje:

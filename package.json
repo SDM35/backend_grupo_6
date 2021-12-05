@@ -1,5 +1,5 @@
 {
-  "name": "EjercicioGraphQL2",
+  "name": "backed_grupo_6",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -19,7 +19,8 @@
     "graphql": "^16.0.1",
     "graphql-tools": "^8.2.0",
     "jsonwebtoken": "^8.5.1",
-    "mongoose": "^6.0.14"
+    "mongoose": "^6.0.14",
+    "nodemon": "^2.0.15"
   },
   "devDependencies": {
     "@babel/cli": "^7.16.0",
