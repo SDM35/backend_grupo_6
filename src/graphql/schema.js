@@ -7,7 +7,8 @@ const typeDefs = `
         login(email: String!, password: String!): String,
         proyectos: [Proyecto],
         Usuarios(rol:String!) : [Usuario],
-        Estudiantes : [Usuario]
+        Estudiantes : [Usuario],
+        Inscripsiones: [Inscripsion]
     }
     
     type Mutation {
