@@ -116,13 +116,13 @@ export const resolvers = {
                return null
            }
        },
+
        async actualizarEstadoEstudiante(parent,args){
            const estudiante = await Usuario.findById(args.id)
            if(args.rol=="Lider"){
                if(estudiante.rol === "Estudiante"){
                 return await Usuario.findByIdAndUpdate(args.id,{
                     estado: args.estado
-
                },{new:true})
                
                }
@@ -133,9 +133,7 @@ export const resolvers = {
        },
        
        async agregarInscripcion(_, { input }) {
-
         const inscripcion = new Inscripcion(input);
-
         return await inscripcion.save();
     },
 
@@ -154,11 +152,6 @@ export const resolvers = {
             return null
         }
     },
-
-
-        
-        
-       
-        
+   
     }
 };
