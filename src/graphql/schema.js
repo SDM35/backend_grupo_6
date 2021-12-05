@@ -66,7 +66,7 @@ const typeDefs = `
 
     type Inscripcion {
         id: ID,
-        proyecto_id: ID.
+        proyecto_id: ID,
         usuario_id: ID,
         estado: String,
         fechaIngreso: String,
@@ -74,7 +74,7 @@ const typeDefs = `
     }
 
     input InscripcionInput {
-        proyecto_id: ID.
+        proyecto_id: ID,
         usuario_id: ID,
         estado: String,
         fechaIngreso: String,

@@ -58,7 +58,7 @@ export const resolvers = {
             
         },
         
-        async Incripciones(_,{usuario_id}){
+        async Inscripcion(_,{usuario_id}){
             if(usuario_id === "Lider"){
                 return await  Inscripcion.find()
             }
