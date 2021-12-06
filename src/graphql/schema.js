@@ -8,12 +8,13 @@ const typeDefs = `
         proyectos: [Proyecto],
         Usuarios(rol:String!) : [Usuario],
         Estudiantes : [Usuario],
-        Inscripsiones: [Inscripsion]
+        Inscripciones: [Inscripcion]
     }
     
     type Mutation {
         agregarUsuario(input: UsuarioInput): Usuario,
         agregarProyecto(input: ProyectoInput): Proyecto,
+        agregarInscripcion(input: InscripcionInput): Inscripcion,
         actualizarUsuario(id : ID!, 
             nombre: String
             email: String
@@ -21,7 +22,8 @@ const typeDefs = `
             rol: String
             password: String ): Usuario,
         actualizarEstadoUser(id:ID!,rol:String!,estado:String!):Usuario,
-        actualizarEstadoEstudiante(id:ID!,rol:String!,estado:String!):Usuario
+        actualizarEstadoEstudiante(id:ID!,rol:String!,estado:String!):Usuario,
+        actualizarEstadoInscripcion(id:ID!,estado:String!): Inscripcion
         
     }
 
@@ -67,8 +69,8 @@ const typeDefs = `
 
     type Inscripcion {
         id: ID,
-        proyecto_id: ID,
-        usuario_id: ID,
+        proyecto_id: Proyecto,
+        usuario_id: Usuario,
         estado: String,
         fechaIngreso: String,
         fechaEgreso: String 
@@ -76,10 +78,7 @@ const typeDefs = `
 
     input InscripcionInput {
         proyecto_id: ID,
-        usuario_id: ID,
-        estado: String,
-        fechaIngreso: String,
-        fechaEgreso: String 
+        usuario_id: ID
     }
 
 `;

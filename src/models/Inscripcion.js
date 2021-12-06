@@ -16,7 +16,7 @@ const InscripcionSchema = Schema({
     },
     estado: { type: String, default: "Pendiente"},
     fechaIngreso: { type: String },
-    fechaEgreso: { type: String }
+    fechaEgreso: { type: String , default: "false"}
 
 
 })

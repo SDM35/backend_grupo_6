@@ -58,13 +58,13 @@ export const resolvers = {
             
         },
         
-        async Inscripciones(_,{usuario_id}){
-            if(usuario_id === "Lider"){
+        async Inscripciones(){
+            //if(usuar === "Lider"){
                 return await  Inscripcion.find()
-            }
-            else{
-                return null
-            }
+           // }
+           // else{
+            //    return null
+           // }
             
         },
 
@@ -132,23 +132,27 @@ export const resolvers = {
            }
        },
        
-       async agregarInscripcion(_, { input }) {
-        const inscripcion = new Inscripcion(input);
-        return await inscripcion.save();
+       async agregarInscripcion(parent,{input}, context) {
+        
+        if (context.user.auth && (context.user.rol === "Estudiante")) {
+            const inscripcion = new Inscripcion(input);
+                return await inscripcion.save()
+
+        
+        }else{
+            return null
+        }
     },
 
     async actualizarEstadoInscripcion(parent,args){
+        if (context.user.auth && (context.user.rol === "Lider")) {
         const inscripcion = await Inscripcion.findById(args.id)
-        if(args.usuario_id=="Lider"){
-            if(inscripcion.usuario_id === "Lider"){
+
              return await Inscripcion.findByIdAndUpdate(args.id,{
                  estado: args.estado
 
             },{new:true})
-            
-            }
-        }
-        else{
+        }else{
             return null
         }
     },
