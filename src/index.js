@@ -3,6 +3,10 @@ import { graphqlHTTP } from 'express-graphql';
 import {dbConnection} from './database/config';
 import schema from './graphql/schema';
 import { validarJwt } from './middleware/validar-jwt';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
 
 const app = express();
 
