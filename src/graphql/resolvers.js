@@ -19,34 +19,32 @@ export const resolvers = {
       const validarPassword = bcrypt.compareSync(password, usuario.password);
 
       if (validarPassword) {
-        const token = await generarJwt(usuario.id, usuario.nombre);
+        const token = await generarJwt(usuario.id, usuario.nombre, usuario.rol);
         return token;
       } else {
         return "Usuario o contraseña incorrecta";
       }
-          },
-  
-  
-        async proyectos(_, args, context) {
-            // console.log(context);
-            // console.log(context.user.rol);
-            // console.log(context.user);
+    },
 
-            // En este if se pregunta si es true o false la autenticación del usuario, y obliga a usar 
-            // un JWT activo
-            if (context.user.auth && ((context.user.rol === "Administrador") || (context.user.rol === "Estudiante"))) {
+    async proyectos(_, args, context) {
+      // console.log(context);
+      // console.log(context.user.rol);
+      // console.log(context.user);
 
-                return await Proyecto.find().populate('lider');
-
-            } else if (context.user.auth && (context.user.rol === "Lider")) {
-
-                return await Proyecto.find({ lider: args.id }).populate('lider');
-
-            } else {
-                return null;
-            }
-
-        },
+      // En este if se pregunta si es true o false la autenticación del usuario, y obliga a usar
+      // un JWT activo
+      if (
+        context.user.auth &&
+        (context.user.rol === "Administrador" ||
+          context.user.rol === "Estudiante")
+      ) {
+        return await Proyecto.find().populate("lider");
+      } else if (context.user.auth && context.user.rol === "Lider") {
+        return await Proyecto.find({ lider: args.id }).populate("lider");
+      } else {
+        return null;
+      }
+    },
 
     async Usuarios(_, args, context) {
       if (context.user.auth && context.user.rol === "Administrador") {
@@ -57,29 +55,27 @@ export const resolvers = {
         return null;
       }
     },
-    
-     async Inscripciones(){
-        if(context.user.auth && context.user.rol === "Lider"){
-                return await  Inscripcion.find()
-           } else{
-            return null
-           }
-     },
-    
-     
-     //Historia de usuario 17
-     
+
+    async Inscripciones() {
+      if (context.user.auth && context.user.rol === "Lider") {
+        return await Inscripcion.find();
+      } else {
+        return null;
+      }
+    },
+
+    //Historia de usuario 17
+
     async informacionProyectoLider(_, { id }, context) {
       console.log(context);
       if (context.user.auth) {
         if (context.user.rol === "Lider") {
-      return await Proyecto.findById(id).populate("avances");
-    } else {
+          return await Proyecto.findById(id).populate("avances");
+        } else {
           return null;
-      }
-
-      }else{
-        return null
+        }
+      } else {
+        return null;
       }
     },
 
@@ -87,8 +83,8 @@ export const resolvers = {
     async listaAvances(_, { idProyecto }, context) {
       if (context.user.auth) {
         if (context.user.rol === "Estudiante") {
-        return await Avance.find({proyecto_id:idProyecto})
-      } else {
+          return await Avance.find({ proyecto_id: idProyecto });
+        } else {
           return null;
         }
       } else {
@@ -107,46 +103,53 @@ export const resolvers = {
       // Se debe usar let en lugar const, debido a que el const no se puede reasignar
       let usuario = new Usuario(input);
       usuario.password = bcrypt.hashSync(usuario.password, salt);
-      
+
       return await usuario.save();
     },
 
-        async agregarProyecto(_, { input }) {
-          if (context.user.auth && (context.user.rol === "Lider")) {
-                const proyecto = new Proyecto(input);
+    async agregarProyecto(_, { input }) {
+      if (context.user.auth && context.user.rol === "Lider") {
+        const proyecto = new Proyecto(input);
 
-                return await proyecto.save();
-            } else {
-              return null
-            }
+        return await proyecto.save();
+      } else {
+        return null;
+      }
+    },
 
-        },
-
-        async actualizarEstadoProyecto(parent, args, context) {
-          if (context.user.auth && (context.user.rol === "Administrador")) {
-                return await Proyecto.findByIdAndUpdate(args.id, {
-                  estado: args.estado,
-                    fase: args.fase
-                }, { new: true })
-              } else {
-                return null
-            }
+    async actualizarEstadoProyecto(parent, args, context) {
+      if (context.user.auth && context.user.rol === "Administrador") {
+        return await Proyecto.findByIdAndUpdate(
+          args.id,
+          {
+            estado: args.estado,
+            fase: args.fase,
           },
+          { new: true }
+        );
+      } else {
+        return null;
+      }
+    },
 
-          async actualizarInfoProyecto(parent, args, context) {
-            if (context.user.auth && (context.user.rol === "Lider")) {
-              return await Proyecto.findByIdAndUpdate(args.id, {
-                    nombre: args.nombre,
-                    objetivosG: args.objetivosG,
-                    objetivosE: args.objetivosE,
-                    presupuesto: args.presupuesto
-                }, { new: true })
-            } else {
-              return null
-            }
+    async actualizarInfoProyecto(parent, args, context) {
+      if (context.user.auth && context.user.rol === "Lider") {
+        return await Proyecto.findByIdAndUpdate(
+          args.id,
+          {
+            nombre: args.nombre,
+            objetivosG: args.objetivosG,
+            objetivosE: args.objetivosE,
+            presupuesto: args.presupuesto,
           },
-    
-          async actualizarUsuario(parent, args, context) {
+          { new: true }
+        );
+      } else {
+        return null;
+      }
+    },
+
+    async actualizarUsuario(parent, args, context) {
       if (context.user.auth) {
         const salt = bcrypt.genSaltSync();
         return await Usuario.findByIdAndUpdate(
@@ -164,36 +167,39 @@ export const resolvers = {
         return null;
       }
     },
-    
-           async agregarInscripcion(parent,{input}, context) {
-             
-        if (context.user.auth && (context.user.rol === "Estudiante")) {
-            const inscripcion = new Inscripcion(input);
-            return await inscripcion.save()
 
-        
-          }else{
-            return null
-        }
+    async agregarInscripcion(parent, { input }, context) {
+      if (context.user.auth && context.user.rol === "Estudiante") {
+        const inscripcion = new Inscripcion(input);
+        return await inscripcion.save();
+      } else {
+        return null;
+      }
     },
-    
-        async actualizarEstadoInscripcion(parent,args){
-        if (context.user.auth && (context.user.rol === "Lider")) {
-          const inscripcion = await Inscripcion.findById(args.id)
 
-             return await Inscripcion.findByIdAndUpdate(args.id,{
-                 estado: args.estado
+    async actualizarEstadoInscripcion(parent, args) {
+      if (context.user.auth && context.user.rol === "Lider") {
+        const inscripcion = await Inscripcion.findById(args.id);
 
-            },{new:true})
-          }else{
-            return null
-        }
-      },
-      
+        return await Inscripcion.findByIdAndUpdate(
+          args.id,
+          {
+            estado: args.estado,
+          },
+          { new: true }
+        );
+      } else {
+        return null;
+      }
+    },
+
     async actualizarEstadoUser(parent, args, context) {
       if (context.user.auth && context.user.rol === "Administrador") {
-        return await Usuario.findByIdAndUpdate( args.id,{estado: args.estado,},
-          { new: true });
+        return await Usuario.findByIdAndUpdate(
+          args.id,
+          { estado: args.estado },
+          { new: true }
+        );
       } else {
         return null;
       }
@@ -202,14 +208,16 @@ export const resolvers = {
       if (context.user.auth && context.user.rol === "Lider") {
         const estudiante = await Usuario.findById(args.id);
         if (estudiante.rol === "Estudiante") {
-          return await Usuario.findByIdAndUpdate(args.id,{estado: args.estado,},
-            { new: true });
+          return await Usuario.findByIdAndUpdate(
+            args.id,
+            { estado: args.estado },
+            { new: true }
+          );
         } else {
           return null;
         }
       }
     },
-    
     //Historia de usuario 18
     async agregarObservacion(_, { idAvance, observacion }, context) {
       if (context.user.auth) {
@@ -274,4 +282,3 @@ export const resolvers = {
       },
     },
 };
-    

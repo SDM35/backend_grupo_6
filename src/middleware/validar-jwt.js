@@ -26,7 +26,7 @@ export const validarJwt = (req, res, next) => {
         console.log(token);
     }
     try {
-        const {uid, nombre, rol} = jwt.verify(token, secret);
+        const {uid, nombre, rol} = jwt.verify(token,process.env.Secret_JWT);
         console.log(uid, nombre, rol);
         req.user = {auth: true, rol: rol, id: uid};
         return next();
