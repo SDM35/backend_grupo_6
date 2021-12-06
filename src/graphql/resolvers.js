@@ -42,9 +42,12 @@ export const resolvers = {
 
         },
        
-       async Usuarios(_,{rol}){
-            if(rol === "Administrador"){
+       async Usuarios(_,args,context){
+            if (context.user.auth && (context.user.rol === "Administrador")) {
                 return await  Usuario.find()
+            }
+            else if(context.user.auth && (context.user.rol === "Lider")){
+                return await  Usuario.find({rol : "Estudiante"})
             }
             else{
                 return null
@@ -52,10 +55,7 @@ export const resolvers = {
             
         },
 
-        Estudiantes(){
-            return Usuario.find({rol : "Estudiante"})
-            
-        }
+        
 
     },
     Mutation: {
