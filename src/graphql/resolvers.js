@@ -25,18 +25,28 @@ export const resolvers = {
         return "Usuario o contraseña incorrecta";
       }
           },
+  }
+  
+        async proyectos(_, args, context) {
+            // console.log(context);
+            // console.log(context.user.rol);
+            // console.log(context.user);
 
-    proyectos(_, args, context) {
-      console.log(context);
+            // En este if se pregunta si es true o false la autenticación del usuario, y obliga a usar 
+            // un JWT activo
+            if (context.user.auth && ((context.user.rol === "Administrador") || (context.user.rol === "Estudiante"))) {
 
-      // En este if se pregunta si es true o false la autenticación del usuario, y obliga a usar
-      // un JWT activo
-      if (context.user.auth) {
-        return Proyecto.find();
-      } else {
-        return null;
-      }
-    },
+                return await Proyecto.find().populate('lider');
+
+            } else if (context.user.auth && (context.user.rol === "Lider")) {
+
+                return await Proyecto.find({ lider: args.id }).populate('lider');
+
+            } else {
+                return null;
+            }
+
+        },
 
     async Usuarios(_, args, context) {
       if (context.user.auth && context.user.rol === "Administrador") {
@@ -67,9 +77,6 @@ export const resolvers = {
       return await Proyecto.findById(id).populate("avances");
         } else {
           return null;
-        }
-      } else {
-        return null;
       }
     },
 
@@ -97,16 +104,45 @@ export const resolvers = {
       // Se debe usar let en lugar const, debido a que el const no se puede reasignar
       let usuario = new Usuario(input);
       usuario.password = bcrypt.hashSync(usuario.password, salt);
-
-      return await usuario.save();
+      
+       return await usuario.save();
     },
 
-    async agregarProyecto(_, { input }) {
-      const proyecto = new Proyecto(input);
+        async agregarProyecto(_, { input }) {
+            if (context.user.auth && (context.user.rol === "Lider")) {
+                const proyecto = new Proyecto(input);
 
-      return await proyecto.save();
-    },
+                return await proyecto.save();
+            } else {
+                return null
+            }
 
+        },
+
+        async actualizarEstadoProyecto(parent, args, context) {
+            if (context.user.auth && (context.user.rol === "Administrador")) {
+                return await Proyecto.findByIdAndUpdate(args.id, {
+                    estado: args.estado,
+                    fase: args.fase
+                }, { new: true })
+            } else {
+                return null
+            }
+        },
+
+        async actualizarInfoProyecto(parent, args, context) {
+            if (context.user.auth && (context.user.rol === "Lider")) {
+                return await Proyecto.findByIdAndUpdate(args.id, {
+                    nombre: args.nombre,
+                    objetivosG: args.objetivosG,
+                    objetivosE: args.objetivosE,
+                    presupuesto: args.presupuesto
+                }, { new: true })
+            } else {
+                return null
+            }
+        },
+    
     async actualizarUsuario(parent, args, context) {
       if (context.user.auth) {
         const salt = bcrypt.genSaltSync();
@@ -235,5 +271,4 @@ export const resolvers = {
       }
     },
   },
-    
 };
