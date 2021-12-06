@@ -2,6 +2,7 @@ import Usuario from "../models/Usuario";
 import bcrypt from "bcrypt";
 import { generarJwt } from "../helpers/jwt";
 import Proyecto from "../models/Proyecto";
+import Inscripcion from "../models/Inscripcion";
 
 export const resolvers = {
   Query: {
@@ -45,6 +46,15 @@ export const resolvers = {
         return null;
       }
     },
+    
+     async Inscripciones(){
+        if(context.user.auth && context.user.rol === "Lider"){
+                return await  Inscripcion.find()
+           } else{
+            return null
+           }
+     }
+    
   },
   Mutation: {
     async agregarUsuario(_, { input }) {
@@ -83,6 +93,31 @@ export const resolvers = {
       } else {
         return null;
       }
+    },
+    
+           async agregarInscripcion(parent,{input}, context) {
+        
+        if (context.user.auth && (context.user.rol === "Estudiante")) {
+            const inscripcion = new Inscripcion(input);
+                return await inscripcion.save()
+
+        
+        }else{
+            return null
+        }
+    },
+    
+        async actualizarEstadoInscripcion(parent,args){
+        if (context.user.auth && (context.user.rol === "Lider")) {
+        const inscripcion = await Inscripcion.findById(args.id)
+
+             return await Inscripcion.findByIdAndUpdate(args.id,{
+                 estado: args.estado
+
+            },{new:true})
+        }else{
+            return null
+        }
     },
 
     async actualizarEstadoUser(parent, args, context) {
