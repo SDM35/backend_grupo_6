@@ -223,7 +223,7 @@ export const resolvers = {
       if (context.user.auth) {
         if (context.user.rol === "Profesor") {
           let { observaciones } = await Avance.findById(idAvance);
-
+          
           let nObservacion = [...observaciones, observacion];
           return await Avance.findByIdAndUpdate(
             idAvance,
@@ -253,33 +253,32 @@ export const resolvers = {
               idProyecto,
               { avances: nAvances },
               { new: true }
-            ).populate("avances");
+              ).populate("avances");
+            }
+          } else {
+            return "No está autorizado para agregar avances";
           }
         } else {
           return "No está autorizado para agregar avances";
         }
-      } else {
-        return "No está autorizado para agregar avances";
-      }
-    },
-    //Historia usuario 23
-    async actualizarAvance(_, { idAvance, avance }, context) {
-      if (context.user.auth) {
-        if (context.user.rol === "Estudiante") {
-          let inAvance = {
-            usuario_id: context.user.id,
-            fechaAvance: Date.now(),
-            avanceEstudiante: avance,
-          };
-          return await Avance.findByIdAndUpdate(idAvance, inAvance, {
-            new: true,
-          });
+      },
+      //Historia usuario 23
+      async actualizarAvance(_, { idAvance, avance }, context) {
+        if (context.user.auth) {
+          if (context.user.rol === "Estudiante") {
+            let inAvance = {
+              usuario_id: context.user.id,
+              fechaAvance: Date.now(),
+              avanceEstudiante: avance,
+            };
+            return await Avance.findByIdAndUpdate(idAvance, inAvance, { new: true });
+            
+          } else {
+            return "No está autorizado para agregar avances";
+          }
         } else {
           return "No está autorizado para agregar avances";
         }
-      } else {
-        return "No está autorizado para agregar avances";
-      }
+      },
     },
-  },
 };
