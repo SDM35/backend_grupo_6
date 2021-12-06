@@ -6,9 +6,8 @@ const typeDefs = `
     type Query {
         login(email: String!, password: String!): String,
         proyectos: [Proyecto],
-        Usuarios(rol:String!) : [Usuario],
-        Estudiantes : [Usuario],
-        Inscripciones: [Inscripcion]
+        Inscripciones: [Inscripcion],
+        Usuarios : [Usuario]
     }
     
     type Mutation {
@@ -21,9 +20,9 @@ const typeDefs = `
             cc: String
             rol: String
             password: String ): Usuario,
-        actualizarEstadoUser(id:ID!,rol:String!,estado:String!):Usuario,
-        actualizarEstadoEstudiante(id:ID!,rol:String!,estado:String!):Usuario,
         actualizarEstadoInscripcion(id:ID!,estado:String!): Inscripcion
+        actualizarEstadoUser(id:ID!,estado:String!):Usuario,
+        actualizarEstadoEstudiante(id:ID!,estado:String!):Usuario
         
     }
 
