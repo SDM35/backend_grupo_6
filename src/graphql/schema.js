@@ -6,20 +6,25 @@ const typeDefs = `
     type Query {
         login(email: String!, password: String!): String,
         proyectos: [Proyecto],
-        Usuarios(rol:String!) : [Usuario],
-        Estudiantes : [Usuario]
+        Inscripciones: [Inscripcion],
+        Usuarios : [Usuario],
+        informacionProyectoLider(id: ID!): Proyecto,
+        listaAvances(idProyecto:ID!):[Avance]
+        
     }
     
     type Mutation {
         agregarUsuario(input: UsuarioInput): Usuario,
+
+        agregarProyecto(input: ProyectoInput): Proyecto,
+        agregarInscripcion(input: InscripcionInput): Inscripcion,
         actualizarUsuario(id : ID!, 
             nombre: String,
             email: String,
             cc: String,
             rol: String,
             password: String ): Usuario,
-        actualizarEstadoUser(id:ID!,rol:String!,estado:String!):Usuario,
-        actualizarEstadoEstudiante(id:ID!,rol:String!,estado:String!):Usuario,
+
 
         agregarProyecto(input: ProyectoInput): Proyecto,
         actualizarEstadoProyecto(id: ID!,
@@ -30,7 +35,14 @@ const typeDefs = `
             objetivosG: [String],
             objetivosE: [String],
             presupuesto: Int): Proyecto
-        
+       
+        actualizarEstadoInscripcion(id:ID!,estado:String!): Inscripcion
+        actualizarEstadoUser(id:ID!,estado:String!):Usuario,
+        actualizarEstadoEstudiante(id:ID!,estado:String!):Usuario
+        agregarObservacion(idAvance: ID! , observacion: ObservacionInput!) : Avance
+        agregarAvance(idProyecto:ID!, avance:String!): Proyecto,
+        actualizarAvance(idAvance:ID!,avance:String!): Avance     
+
     }
 
     type Usuario {
@@ -42,7 +54,21 @@ const typeDefs = `
         rol: String,
         estado: String
     }
+    type Observacion{
+        observacion:String,
+        fechaObservacion: String
+     }
+     
+    type Avance {
+         id: ID,
+         proyecto_id: ID,
+         usuario_id: ID,
+         fechaAvance: String,
+         avanceEstudiante: String,
+         observaciones: [Observacion]   
+    }
 
+   
     type Proyecto {
         id: ID,
         nombre: String,
@@ -54,8 +80,15 @@ const typeDefs = `
         lider: Usuario,
         estado: Boolean,
         fase: String      
+        avances: [Avance]
+
+
     }
 
+    type AvanceEstudiante{
+        avanceEstudiante: ID!
+    }
+  
     input UsuarioInput {
         nombre: String,
         email: String,
@@ -73,12 +106,32 @@ const typeDefs = `
         lider: ID
     }
 
+    input ObservacionInput{
+        observacion: String!,
+        fechaObservacion: String
+
+    }
+   
+    type Inscripcion {
+        id: ID,
+        proyecto_id: Proyecto,
+        usuario_id: Usuario,
+        estado: String,
+        fechaIngreso: String,
+        fechaEgreso: String 
+    }
+
+    input InscripcionInput {
+        proyecto_id: ID,
+        usuario_id: ID
+    }
+
 `;
 
 // Query en GraphQL SIN arreglo de lenguaje:
 
 // {
-// 	hola(Nombre: "Santiago"),  
+// 	hola(Nombre: "Santiago"),
 //   cursos{
 //     nombre
 //     id
@@ -143,6 +196,6 @@ const typeDefs = `
 //     }
 
 export default makeExecutableSchema({
-    typeDefs: typeDefs,
-    resolvers: resolvers
+  typeDefs: typeDefs,
+  resolvers: resolvers,
 });
