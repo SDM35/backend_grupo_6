@@ -10,7 +10,7 @@ export const generarJwt = (uid, nombre, rol) => {
             rol
         }
 
-        jwt.sign(payload, secret, { expiresIn: "2h" },
+        jwt.sign(payload, process.env.Secret_JWT, { expiresIn: "2h" },
             (err, token) => {
                 if(err){
                     console.log(err);
