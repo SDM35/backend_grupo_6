@@ -25,7 +25,7 @@ export const resolvers = {
         return "Usuario o contraseña incorrecta";
       }
           },
-  }
+  
   
         async proyectos(_, args, context) {
             // console.log(context);
@@ -64,19 +64,22 @@ export const resolvers = {
            } else{
             return null
            }
-     }
+     },
     
-  },
-      
-    //Historia de usuario 17
-
+     
+     //Historia de usuario 17
+     
     async informacionProyectoLider(_, { id }, context) {
       console.log(context);
       if (context.user.auth) {
         if (context.user.rol === "Lider") {
       return await Proyecto.findById(id).populate("avances");
-        } else {
+    } else {
           return null;
+      }
+
+      }else{
+        return null
       }
     },
 
@@ -85,7 +88,7 @@ export const resolvers = {
       if (context.user.auth) {
         if (context.user.rol === "Estudiante") {
         return await Avance.find({proyecto_id:idProyecto})
-        } else {
+      } else {
           return null;
         }
       } else {
@@ -93,7 +96,7 @@ export const resolvers = {
       }
     },
   },
-     
+
   Mutation: {
     async agregarUsuario(_, { input }) {
       // No es necesario desestructurar ya que el objeto "input" ya viene armado con los
@@ -105,45 +108,45 @@ export const resolvers = {
       let usuario = new Usuario(input);
       usuario.password = bcrypt.hashSync(usuario.password, salt);
       
-       return await usuario.save();
+      return await usuario.save();
     },
 
         async agregarProyecto(_, { input }) {
-            if (context.user.auth && (context.user.rol === "Lider")) {
+          if (context.user.auth && (context.user.rol === "Lider")) {
                 const proyecto = new Proyecto(input);
 
                 return await proyecto.save();
             } else {
-                return null
+              return null
             }
 
         },
 
         async actualizarEstadoProyecto(parent, args, context) {
-            if (context.user.auth && (context.user.rol === "Administrador")) {
+          if (context.user.auth && (context.user.rol === "Administrador")) {
                 return await Proyecto.findByIdAndUpdate(args.id, {
-                    estado: args.estado,
+                  estado: args.estado,
                     fase: args.fase
                 }, { new: true })
-            } else {
+              } else {
                 return null
             }
-        },
+          },
 
-        async actualizarInfoProyecto(parent, args, context) {
+          async actualizarInfoProyecto(parent, args, context) {
             if (context.user.auth && (context.user.rol === "Lider")) {
-                return await Proyecto.findByIdAndUpdate(args.id, {
+              return await Proyecto.findByIdAndUpdate(args.id, {
                     nombre: args.nombre,
                     objetivosG: args.objetivosG,
                     objetivosE: args.objetivosE,
                     presupuesto: args.presupuesto
                 }, { new: true })
             } else {
-                return null
+              return null
             }
-        },
+          },
     
-    async actualizarUsuario(parent, args, context) {
+          async actualizarUsuario(parent, args, context) {
       if (context.user.auth) {
         const salt = bcrypt.genSaltSync();
         return await Usuario.findByIdAndUpdate(
@@ -163,30 +166,30 @@ export const resolvers = {
     },
     
            async agregarInscripcion(parent,{input}, context) {
-        
+             
         if (context.user.auth && (context.user.rol === "Estudiante")) {
             const inscripcion = new Inscripcion(input);
-                return await inscripcion.save()
+            return await inscripcion.save()
 
         
-        }else{
+          }else{
             return null
         }
     },
     
         async actualizarEstadoInscripcion(parent,args){
         if (context.user.auth && (context.user.rol === "Lider")) {
-        const inscripcion = await Inscripcion.findById(args.id)
+          const inscripcion = await Inscripcion.findById(args.id)
 
              return await Inscripcion.findByIdAndUpdate(args.id,{
                  estado: args.estado
 
             },{new:true})
-        }else{
+          }else{
             return null
         }
-    },
-
+      },
+      
     async actualizarEstadoUser(parent, args, context) {
       if (context.user.auth && context.user.rol === "Administrador") {
         return await Usuario.findByIdAndUpdate( args.id,{estado: args.estado,},
@@ -208,7 +211,7 @@ export const resolvers = {
     },
   },
     
-    //Historia de usuario 18
+  //Historia de usuario 18
     async agregarObservacion(_, { idAvance, observacion }, context) {
       if (context.user.auth) {
         if (context.user.rol === "Profesor") {
@@ -270,5 +273,4 @@ export const resolvers = {
         return "No está autorizado para agregar avances";
       }
     },
-  },
-};
+  };
