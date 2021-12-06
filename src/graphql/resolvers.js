@@ -27,14 +27,14 @@ export const resolvers = {
             }
         },
 
-        proyectos(_, args, context) {
+        async proyectos(_, args, context) {
             console.log(context);
 
             // En este if se pregunta si es true o false la autenticación del usuario, y obliga a usar 
             // un JWT activo
             if(context.user.auth){
 
-                return Proyecto.find();
+                return await Proyecto.find().populate('lider');
 
             } else {
                 return null;
@@ -74,17 +74,6 @@ export const resolvers = {
             return await usuario.save();
         },
 
-        async agregarProyecto(_, { input }) {
-
-            
-
-            const proyecto = new Proyecto(input);
-
-            return await proyecto.save();
-
-           
-        },
-
        async actualizarUsuario(parent,args){
 
            const salt = bcrypt.genSaltSync();
@@ -122,12 +111,26 @@ export const resolvers = {
            else{
                return null
            }
-       }
+       },
        
+       async agregarProyecto(_, { input }) {            
+
+        const proyecto = new Proyecto(input);
+
+        return await proyecto.save();
        
-        
-        
-       
-        
+    },
+
+    async actualizarEstadoProyecto(parent, args, context){
+        // const proyecto = await Proyecto.findById(args.id)
+        if(context.user.auth){
+            return await Proyecto.findByIdAndUpdate(args.id,{
+                estado: args.estado
+            },{new:true})
+        }else{
+            return null
+        }
+    },
+
     }
 };

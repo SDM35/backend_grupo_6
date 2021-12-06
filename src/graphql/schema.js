@@ -12,7 +12,6 @@ const typeDefs = `
     
     type Mutation {
         agregarUsuario(input: UsuarioInput): Usuario,
-        agregarProyecto(input: ProyectoInput): Proyecto,
         actualizarUsuario(id : ID!, 
             nombre: String
             email: String
@@ -20,7 +19,12 @@ const typeDefs = `
             rol: String
             password: String ): Usuario,
         actualizarEstadoUser(id:ID!,rol:String!,estado:String!):Usuario,
-        actualizarEstadoEstudiante(id:ID!,rol:String!,estado:String!):Usuario
+        actualizarEstadoEstudiante(id:ID!,rol:String!,estado:String!):Usuario,
+        agregarProyecto(input: ProyectoInput): Proyecto,
+        actualizarEstadoProyecto(id: ID!,
+            estado: Boolean
+
+        )
         
     }
 
@@ -42,7 +46,7 @@ const typeDefs = `
         presupuesto: Int,
         fechaInicio: String,
         fechaFin: String,
-        lider: ID,
+        lider: Usuario,
         estado: String,
         fase: String      
     }
