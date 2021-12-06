@@ -24,9 +24,6 @@ const typeDefs = `
             cc: String,
             rol: String,
             password: String ): Usuario,
-
-
-        agregarProyecto(input: ProyectoInput): Proyecto,
         actualizarEstadoProyecto(id: ID!,
             estado: Boolean,
             fase: String): Proyecto,
@@ -34,12 +31,12 @@ const typeDefs = `
             nombre: String,
             objetivosG: [String],
             objetivosE: [String],
-            presupuesto: Int): Proyecto
+            presupuesto: Int): Proyecto,
        
-        actualizarEstadoInscripcion(id:ID!,estado:String!): Inscripcion
+        actualizarEstadoInscripcion(id:ID!,estado:String!): Inscripcion,
         actualizarEstadoUser(id:ID!,estado:String!):Usuario,
-        actualizarEstadoEstudiante(id:ID!,estado:String!):Usuario
-        agregarObservacion(idAvance: ID! , observacion: ObservacionInput!) : Avance
+        actualizarEstadoEstudiante(id:ID!,estado:String!):Usuario,
+        agregarObservacion(idAvance: ID! , observacion: ObservacionInput!) : Avance,
         agregarAvance(idProyecto:ID!, avance:String!): Proyecto,
         actualizarAvance(idAvance:ID!,avance:String!): Avance     
 
