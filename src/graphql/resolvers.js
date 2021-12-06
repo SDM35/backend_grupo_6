@@ -7,7 +7,7 @@ import Proyecto from "../models/Proyecto";
 export const resolvers = {
 
     Query: {
-        async login (_, { email, password }) {
+        async login(_, { email, password }) {
 
             const usuario = await Usuario.findOne({
                 email
@@ -20,7 +20,7 @@ export const resolvers = {
             const validarPassword = bcrypt.compareSync(password, usuario.password);
 
             if (validarPassword) {
-                const token = await generarJwt(usuario.id, usuario.nombre)
+                const token = await generarJwt(usuario.id, usuario.nombre, usuario.rol)
                 return token;
             } else {
                 return "Usuario o contraseña incorrecta";
@@ -28,33 +28,39 @@ export const resolvers = {
         },
 
         async proyectos(_, args, context) {
-            console.log(context);
+            // console.log(context);
+            // console.log(context.user.rol);
+            // console.log(context.user);
 
             // En este if se pregunta si es true o false la autenticación del usuario, y obliga a usar 
             // un JWT activo
-            if(context.user.auth){
+            if (context.user.auth && ((context.user.rol === "Administrador") || (context.user.rol === "Estudiante"))) {
 
                 return await Proyecto.find().populate('lider');
+
+            } else if (context.user.auth && (context.user.rol === "Lider")) {
+
+                return await Proyecto.find({ lider: args.id }).populate('lider');
 
             } else {
                 return null;
             }
 
         },
-       
-       async Usuarios(_,{rol}){
-            if(rol === "Administrador"){
-                return await  Usuario.find()
+
+        async Usuarios(_, { rol }) {
+            if (rol === "Administrador") {
+                return await Usuario.find()
             }
-            else{
+            else {
                 return null
             }
-            
+
         },
 
-        Estudiantes(){
-            return Usuario.find({rol : "Estudiante"})
-            
+        Estudiantes() {
+            return Usuario.find({ rol: "Estudiante" })
+
         }
 
     },
@@ -74,63 +80,79 @@ export const resolvers = {
             return await usuario.save();
         },
 
-       async actualizarUsuario(parent,args){
+        async actualizarUsuario(parent, args) {
 
-           const salt = bcrypt.genSaltSync();
-           let user = await Usuario.findById(args.id)
-           return await Usuario.findByIdAndUpdate(args.id,{
-               nombre : args.nombre,
-               email: args.email,
-               cc: args.cc,
-               rol: args.rol,
-               password: args.password = bcrypt.hashSync(args.password, salt)
-           }, {new:true})
-       },
+            const salt = bcrypt.genSaltSync();
+            let user = await Usuario.findById(args.id)
+            return await Usuario.findByIdAndUpdate(args.id, {
+                nombre: args.nombre,
+                email: args.email,
+                cc: args.cc,
+                rol: args.rol,
+                password: args.password = bcrypt.hashSync(args.password, salt)
+            }, { new: true })
+        },
 
-       async actualizarEstadoUser(parent,args){
-           const user = await Usuario.findById(args.id)
-           if(args.rol === "Admistrador"){
-               return await Usuario.findByIdAndUpdate(args.id,{
-                   estado: args.estado
-               },{new:true})
-           }else{
-               return null
-           }
-       },
-       async actualizarEstadoEstudiante(parent,args){
-           const estudiante = await Usuario.findById(args.id)
-           if(args.rol=="Lider"){
-               if(estudiante.rol === "Estudiante"){
-                return await Usuario.findByIdAndUpdate(args.id,{
+        async actualizarEstadoUser(parent, args) {
+            const user = await Usuario.findById(args.id)
+            if (args.rol === "Admistrador") {
+                return await Usuario.findByIdAndUpdate(args.id, {
                     estado: args.estado
+                }, { new: true })
+            } else {
+                return null
+            }
+        },
+        async actualizarEstadoEstudiante(parent, args) {
+            const estudiante = await Usuario.findById(args.id)
+            if (args.rol == "Lider") {
+                if (estudiante.rol === "Estudiante") {
+                    return await Usuario.findByIdAndUpdate(args.id, {
+                        estado: args.estado
 
-               },{new:true})
-               
-               }
-           }
-           else{
-               return null
-           }
-       },
-       
-       async agregarProyecto(_, { input }) {            
+                    }, { new: true })
 
-        const proyecto = new Proyecto(input);
+                }
+            }
+            else {
+                return null
+            }
+        },
 
-        return await proyecto.save();
-       
-    },
+        async agregarProyecto(_, { input }) {
+            if (context.user.auth && (context.user.rol === "Lider")) {
+                const proyecto = new Proyecto(input);
 
-    async actualizarEstadoProyecto(parent, args, context){
-        // const proyecto = await Proyecto.findById(args.id)
-        if(context.user.auth){
-            return await Proyecto.findByIdAndUpdate(args.id,{
-                estado: args.estado
-            },{new:true})
-        }else{
-            return null
-        }
-    },
+                return await proyecto.save();
+            } else {
+                return null
+            }
+
+        },
+
+        async actualizarEstadoProyecto(parent, args, context) {
+            if (context.user.auth && (context.user.rol === "Administrador")) {
+                return await Proyecto.findByIdAndUpdate(args.id, {
+                    estado: args.estado,
+                    fase: args.fase
+                }, { new: true })
+            } else {
+                return null
+            }
+        },
+
+        async actualizarInfoProyecto(parent, args, context) {
+            if (context.user.auth && (context.user.rol === "Lider")) {
+                return await Proyecto.findByIdAndUpdate(args.id, {
+                    nombre: args.nombre,
+                    objetivosG: args.objetivosG,
+                    objetivosE: args.objetivosE,
+                    presupuesto: args.presupuesto
+                }, { new: true })
+            } else {
+                return null
+            }
+        },
 
     }
 };

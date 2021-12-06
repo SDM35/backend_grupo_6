@@ -2,11 +2,12 @@ import jwt from "jsonwebtoken";
 
 const secret = "@SecretKey@";
 
-export const generarJwt = (uid, nombre) => {
+export const generarJwt = (uid, nombre, rol) => {
     return new Promise((resolve, reject) => {
         const payload = {
             uid,
-            nombre
+            nombre,
+            rol
         }
 
         jwt.sign(payload, secret, { expiresIn: "2h" },
