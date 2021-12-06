@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import { generarJwt } from "../helpers/jwt";
 import Proyecto from "../models/Proyecto";
 import Avance from "../models/Avance";
+import Inscripcion from "../models/Inscripcion";
 
 export const resolvers = {
   Query: {
@@ -23,7 +24,7 @@ export const resolvers = {
       } else {
         return "Usuario o contraseña incorrecta";
       }
-    },
+          },
 
     proyectos(_, args, context) {
       console.log(context);
@@ -36,22 +37,28 @@ export const resolvers = {
         return null;
       }
     },
-    //Historia de usuario 17
-    async informacionProyectosLider(_, { idProyecto }, context) {
-      // console.log(context);
-      if (context.user.auth) {
-        if (context.user.rol === "Lider") {
-          let lProyectos = await Proyecto.findById(idProyecto).populate(
-            "avances"
-          );
-          return lProyectos;
-        } else {
-          return "El usuario no tiene los permisos para ver esta información";
-        }
+
+    async Usuarios(_, args, context) {
+      if (context.user.auth && context.user.rol === "Administrador") {
+        return await Usuario.find();
+      } else if (context.user.auth && context.user.rol === "Lider") {
+        return await Usuario.find({ rol: "Estudiante" });
       } else {
-        return "El usuario no tiene los permisos para ver esta información";
+        return null;
       }
     },
+    
+     async Inscripciones(){
+        if(context.user.auth && context.user.rol === "Lider"){
+                return await  Inscripcion.find()
+           } else{
+            return null
+           }
+     }
+    
+  },
+      
+    //Historia de usuario 17
 
     async informacionProyectoLider(_, { id }, context) {
       console.log(context);
@@ -79,6 +86,7 @@ export const resolvers = {
       }
     },
   },
+     
   Mutation: {
     async agregarUsuario(_, { input }) {
       // No es necesario desestructurar ya que el objeto "input" ya viene armado con los
@@ -94,24 +102,76 @@ export const resolvers = {
     },
 
     async agregarProyecto(_, { input }) {
-      // Cuando es un unico lenguaje:
-
-      // const curso = new Curso({
-      //     nombre: input.nombre,
-      //     lenguaje: input.lenguaje,
-      //     fecha: input.fecha,
-
-      //     // profesorId : args.profesorId
-      //   });
-
-      // Cuando es un arreglo de lenguajes:
-
       const proyecto = new Proyecto(input);
 
       return await proyecto.save();
-
-      // return input;
     },
+
+    async actualizarUsuario(parent, args, context) {
+      if (context.user.auth) {
+        const salt = bcrypt.genSaltSync();
+        return await Usuario.findByIdAndUpdate(
+          args.id,
+          {
+            nombre: args.nombre,
+            email: args.email,
+            cc: args.cc,
+            rol: args.rol,
+            password: (args.password = bcrypt.hashSync(args.password, salt)),
+          },
+          { new: true }
+        );
+      } else {
+        return null;
+      }
+    },
+    
+           async agregarInscripcion(parent,{input}, context) {
+        
+        if (context.user.auth && (context.user.rol === "Estudiante")) {
+            const inscripcion = new Inscripcion(input);
+                return await inscripcion.save()
+
+        
+        }else{
+            return null
+        }
+    },
+    
+        async actualizarEstadoInscripcion(parent,args){
+        if (context.user.auth && (context.user.rol === "Lider")) {
+        const inscripcion = await Inscripcion.findById(args.id)
+
+             return await Inscripcion.findByIdAndUpdate(args.id,{
+                 estado: args.estado
+
+            },{new:true})
+        }else{
+            return null
+        }
+    },
+
+    async actualizarEstadoUser(parent, args, context) {
+      if (context.user.auth && context.user.rol === "Administrador") {
+        return await Usuario.findByIdAndUpdate( args.id,{estado: args.estado,},
+          { new: true });
+      } else {
+        return null;
+      }
+    },
+    async actualizarEstadoEstudiante(parent, args, context) {
+      if (context.user.auth && context.user.rol === "Lider") {
+        const estudiante = await Usuario.findById(args.id);
+        if (estudiante.rol === "Estudiante") {
+          return await Usuario.findByIdAndUpdate(args.id,{estado: args.estado,},
+            { new: true });
+        } else {
+          return null;
+        }
+      }
+    },
+  },
+    
     //Historia de usuario 18
     async agregarObservacion(_, { idAvance, observacion }, context) {
       if (context.user.auth) {
@@ -175,4 +235,5 @@ export const resolvers = {
       }
     },
   },
+    
 };

@@ -6,26 +6,37 @@ const typeDefs = `
     type Query {
         login(email: String!, password: String!): String,
         proyectos: [Proyecto],
-        informacionProyectosLider(idProyecto:ID!):[Proyecto]
+        Inscripciones: [Inscripcion],
+        Usuarios : [Usuario],
         informacionProyectoLider(id: ID!): Proyecto,
-        listaAvances(idProyecto:ID!):[Avance],
+        listaAvances(idProyecto:ID!):[Avance]
         
     }
     
     type Mutation {
-        agregarUsuario(input: UsuarioInput): Usuario
-        agregarProyecto(input: ProyectoInput): Proyecto
+        agregarUsuario(input: UsuarioInput): Usuario,
+        agregarProyecto(input: ProyectoInput): Proyecto,
+        agregarInscripcion(input: InscripcionInput): Inscripcion,
+        actualizarUsuario(id : ID!, 
+            nombre: String
+            email: String
+            cc: String
+            rol: String
+            password: String ): Usuario,
+        actualizarEstadoInscripcion(id:ID!,estado:String!): Inscripcion
+        actualizarEstadoUser(id:ID!,estado:String!):Usuario,
+        actualizarEstadoEstudiante(id:ID!,estado:String!):Usuario
         agregarObservacion(idAvance: ID! , observacion: ObservacionInput!) : Avance
         agregarAvance(idProyecto:ID!, avance:String!): Proyecto,
-        actualizarAvance(idAvance:ID!,avance:String!): Avance,
+        actualizarAvance(idAvance:ID!,avance:String!): Avance     
+
     }
 
-
     type Usuario {
-        id: ID,
+        id: ID!,
         nombre: String,
         email: String,
-        cc: Int,
+        cc: String,
         password: String,
         rol: String,
         estado: String
@@ -63,16 +74,14 @@ const typeDefs = `
     type AvanceEstudiante{
         avanceEstudiante: ID!
     }
- 
-
-    
-
+  
     input UsuarioInput {
         nombre: String,
         email: String,
-        cc: Int,
+        cc: String,
         password: String,
-        rol: String
+        rol: String,
+        estado: String
     }
 
     input ProyectoInput {
@@ -83,18 +92,25 @@ const typeDefs = `
         lider: ID
     }
 
-   
-
     input ObservacionInput{
         observacion: String!,
         fechaObservacion: String
 
     }
    
+    type Inscripcion {
+        id: ID,
+        proyecto_id: Proyecto,
+        usuario_id: Usuario,
+        estado: String,
+        fechaIngreso: String,
+        fechaEgreso: String 
+    }
 
- 
-
-
+    input InscripcionInput {
+        proyecto_id: ID,
+        usuario_id: ID
+    }
 
 `;
 
