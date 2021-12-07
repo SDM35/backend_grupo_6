@@ -36,7 +36,7 @@ const typeDefs = `
         actualizarEstadoInscripcion(id:ID!,estado:String!): Inscripcion,
         actualizarEstadoUser(id:ID!,estado:String!):Usuario,
         actualizarEstadoEstudiante(id:ID!,estado:String!):Usuario,
-        agregarObservacion(idAvance: ID! , observacion: ObservacionInput!) : Avance,
+        agregarObservacion(idAvance: ID! , observacion: String!) : Avance,
         agregarAvance(idProyecto:ID!, avance:String!): Proyecto,
         actualizarAvance(idAvance:ID!,avance:String!): Avance     
 
