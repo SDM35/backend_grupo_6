@@ -56,7 +56,7 @@ export const resolvers = {
       }
     },
 
-    async Inscripciones() {
+    async Inscripciones(_,args,context) {
       if (context.user.auth && context.user.rol === "Lider") {
         return await Inscripcion.find();
       } else {
@@ -107,7 +107,7 @@ export const resolvers = {
       return await usuario.save();
     },
 
-    async agregarProyecto(_, { input }) {
+    async agregarProyecto(_, { input },context) {
       if (context.user.auth && context.user.rol === "Lider") {
         const proyecto = new Proyecto(input);
 
@@ -177,7 +177,7 @@ export const resolvers = {
       }
     },
 
-    async actualizarEstadoInscripcion(parent, args) {
+    async actualizarEstadoInscripcion(parent, args,context) {
       if (context.user.auth && context.user.rol === "Lider") {
         const inscripcion = await Inscripcion.findById(args.id);
 
@@ -221,10 +221,13 @@ export const resolvers = {
     //Historia de usuario 18
     async agregarObservacion(_, { idAvance, observacion }, context) {
       if (context.user.auth) {
-        if (context.user.rol === "Profesor") {
+        if (context.user.rol === "Lider") {
           let { observaciones } = await Avance.findById(idAvance);
-          
-          let nObservacion = [...observaciones, observacion];
+           let inObservacion={
+             observacion:observacion,
+             fechaObservacion: Date.now()
+           }
+          let nObservacion = [...observaciones, inObservacion];
           return await Avance.findByIdAndUpdate(
             idAvance,
             { observaciones: nObservacion },

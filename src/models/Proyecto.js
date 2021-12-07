@@ -3,12 +3,14 @@ const ProyectoSchema = Schema({
   nombre: { type: String, required: true },
   objetivosG: [
     {
-      objetivo: { type: String, required: true },
+      type: String,
+      required: true,
     },
   ],
   objetivosE: [
     {
-      objetivo: { type: String, required: true },
+      type: String,
+      required: true,
     },
   ],
   presupuesto: { type: Number, required: true },
