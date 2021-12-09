@@ -26,6 +26,26 @@ export const resolvers = {
       }
     },
 
+    // async proyectos(_, args, context) {
+    //   // console.log(context);
+    //   // console.log(context.user.rol);
+    //   // console.log(context.user);
+
+    //   // En este if se pregunta si es true o false la autenticación del usuario, y obliga a usar
+    //   // un JWT activo
+    //   if (
+    //     context.user.auth &&
+    //     (context.user.rol === "Administrador" ||
+    //       context.user.rol === "Lider" || context.user.rol == "Estudiante")
+    //   ) {
+    //     return await Proyecto.find().populate("lider");
+    //   } else if (context.user.auth && context.user.rol === "Lider") {
+    //     return await Proyecto.find(context.user.id).populate("lider");
+    //   } else {
+    //     return null;
+    //   }
+    // },
+
     async proyectos(_, args, context) {
       // console.log(context);
       // console.log(context.user.rol);
@@ -33,19 +53,21 @@ export const resolvers = {
 
       // En este if se pregunta si es true o false la autenticación del usuario, y obliga a usar
       // un JWT activo
-      if (
-        context.user.auth &&
-        (context.user.rol === "Administrador" ||
-          context.user.rol === "Estudiante")
+      if (context.user.auth && (context.user.rol === "Administrador")
       ) {
         return await Proyecto.find().populate("lider");
-      } else if (context.user.auth && context.user.rol === "Lider") {
-        return await Proyecto.find({ lider: args.id }).populate("lider");
+
+      } else if (context.user.auth && (context.user.rol === "Lider")) {
+        return await Proyecto.find({lider: context.user.id}).populate("lider");
+
+      } else if (context.user.auth && (context.user.rol === "Estudiante")) {
+        return await Proyecto.find({estado: true}).populate("lider");
+
       } else {
         return null;
       }
     },
-
+    
     async Usuarios(_, args, context) {
       if (context.user.auth && context.user.rol === "Administrador") {
         return await Usuario.find();
@@ -58,7 +80,7 @@ export const resolvers = {
 
     async Inscripciones(_,args,context) {
       if (context.user.auth && context.user.rol === "Lider") {
-        return await Inscripcion.find();
+        return await Inscripcion.find().populate("usuario_id").populate("proyecto_id");
       } else {
         return null;
       }
