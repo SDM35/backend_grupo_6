@@ -36,7 +36,7 @@ export const resolvers = {
       if (
         context.user.auth &&
         (context.user.rol === "Administrador" ||
-          context.user.rol === "Estudiante")
+          context.user.rol === "Lider")
       ) {
         return await Proyecto.find().populate("lider");
       } else if (context.user.auth && context.user.rol === "Lider") {
@@ -58,7 +58,7 @@ export const resolvers = {
 
     async Inscripciones(_,args,context) {
       if (context.user.auth && context.user.rol === "Lider") {
-        return await Inscripcion.find();
+        return await Inscripcion.find().populate("usuario_id");
       } else {
         return null;
       }
