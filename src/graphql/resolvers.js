@@ -26,26 +26,6 @@ export const resolvers = {
       }
     },
 
-    // async proyectos(_, args, context) {
-    //   // console.log(context);
-    //   // console.log(context.user.rol);
-    //   // console.log(context.user);
-
-    //   // En este if se pregunta si es true o false la autenticación del usuario, y obliga a usar
-    //   // un JWT activo
-    //   if (
-    //     context.user.auth &&
-    //     (context.user.rol === "Administrador" ||
-    //       context.user.rol === "Lider" || context.user.rol == "Estudiante")
-    //   ) {
-    //     return await Proyecto.find().populate("lider");
-    //   } else if (context.user.auth && context.user.rol === "Lider") {
-    //     return await Proyecto.find(context.user.id).populate("lider");
-    //   } else {
-    //     return null;
-    //   }
-    // },
-
     async proyectos(_, args, context) {
       // console.log(context);
       // console.log(context.user.rol);
