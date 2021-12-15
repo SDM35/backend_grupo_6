@@ -25,7 +25,7 @@ const typeDefs = `
             email: String,
             cc: String,
             rol: String,
-            password: String ): Usuario,
+            ): Usuario,
         actualizarEstadoProyecto(id: ID!,
             estado: Boolean,
             fase: String): Proyecto,

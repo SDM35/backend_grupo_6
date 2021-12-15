@@ -187,7 +187,7 @@ export const resolvers = {
             email: args.email,
             cc: args.cc,
             rol: args.rol,
-            password: (args.password = bcrypt.hashSync(args.password, salt)),
+            
           },
           { new: true }
         );
@@ -222,7 +222,7 @@ export const resolvers = {
     },
 
     async actualizarEstadoUser(parent, args, context) {
-      if (context.user.auth && context.user.rol === "Administrador") {
+      if (context.user.auth && (context.user.rol === "Administrador" || context.user.rol=="Lider")) {
         return await Usuario.findByIdAndUpdate(
           args.id,
           { estado: args.estado },
