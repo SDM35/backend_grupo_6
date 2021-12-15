@@ -4,10 +4,12 @@ import { resolvers } from "./resolvers";
 const typeDefs = `
 
     type Query {
-        login(email: String!, password: String!): String,
+        login(email: String!, password: String!): Auth,
         proyectos: [Proyecto],
+        proyectoById(id: ID!): Proyecto,
         Inscripciones: [Inscripcion],
-        Usuarios : [Usuario],
+        Usuarios: [Usuario],
+        usuarioById(id: ID!): Usuario,
         informacionProyectoLider(id: ID!): Proyecto,
         listaAvances(idProyecto:ID!):[Avance]
         
@@ -42,6 +44,13 @@ const typeDefs = `
 
     }
 
+    type Auth {
+        id: ID,
+        nombre: String,
+        token: String,
+        rol: String
+    }
+
     type Usuario {
         id: ID!,
         nombre: String,
@@ -51,6 +60,7 @@ const typeDefs = `
         rol: String,
         estado: String
     }
+
     type Observacion{
         observacion:String,
         fechaObservacion: String

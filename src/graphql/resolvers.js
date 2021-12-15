@@ -18,36 +18,49 @@ export const resolvers = {
 
       const validarPassword = bcrypt.compareSync(password, usuario.password);
 
-      if (validarPassword) {
-        const token = await generarJwt(usuario.id, usuario.nombre, usuario.rol);
-        return token;
+      if (usuario.estado === "Autorizado") {
+
+        if (validarPassword) {
+          const token = await generarJwt(usuario.id, usuario.nombre, usuario.rol);
+          return {
+            token,
+            id: usuario.id,
+            rol: usuario.rol,
+            nombre: usuario.nombre
+          }
+        } else {
+          return "Usuario o contraseña incorrecta";
+        }
+
       } else {
-        return "Usuario o contraseña incorrecta";
+        return "Usuario no autorizado - Comuniquese con el admin"
       }
     },
 
     async proyectos(_, args, context) {
-      // console.log(context);
-      // console.log(context.user.rol);
-      // console.log(context.user);
-
-      // En este if se pregunta si es true o false la autenticación del usuario, y obliga a usar
-      // un JWT activo
       if (context.user.auth && (context.user.rol === "Administrador")
       ) {
         return await Proyecto.find().populate("lider");
 
       } else if (context.user.auth && (context.user.rol === "Lider")) {
-        return await Proyecto.find({lider: context.user.id}).populate("lider");
+        return await Proyecto.find({ lider: context.user.id }).populate("lider");
 
       } else if (context.user.auth && (context.user.rol === "Estudiante")) {
-        return await Proyecto.find({estado: true}).populate("lider");
+        return await Proyecto.find({ estado: true }).populate("lider");
 
       } else {
         return null;
       }
     },
-    
+
+    async proyectoById(_, { id }, context) {
+      if (context.user.auth && ((context.user.rol === "Administrador") || (context.user.rol === "Lider"))) {
+        return await Proyecto.findById(id).populate("lider");
+      } else {
+        return null;
+      }
+    },
+
     async Usuarios(_, args, context) {
       if (context.user.auth && context.user.rol === "Administrador") {
         return await Usuario.find();
@@ -58,7 +71,15 @@ export const resolvers = {
       }
     },
 
-    async Inscripciones(_,args,context) {
+    async usuarioById(_, { id }, context) {
+      if (context.user.auth) {
+        return await Usuario.findById(id);
+      } else {
+        return null;
+      }
+    },
+
+    async Inscripciones(_, args, context) {
       if (context.user.auth && context.user.rol === "Lider") {
         return await Inscripcion.find().populate("usuario_id").populate("proyecto_id");
       } else {
@@ -109,7 +130,7 @@ export const resolvers = {
       return await usuario.save();
     },
 
-    async agregarProyecto(_, { input },context) {
+    async agregarProyecto(_, { input }, context) {
       if (context.user.auth && context.user.rol === "Lider") {
         const proyecto = new Proyecto(input);
 
@@ -121,14 +142,19 @@ export const resolvers = {
 
     async actualizarEstadoProyecto(parent, args, context) {
       if (context.user.auth && context.user.rol === "Administrador") {
-        return await Proyecto.findByIdAndUpdate(
-          args.id,
-          {
-            estado: args.estado,
-            fase: args.fase,
-          },
-          { new: true }
-        );
+        if (args.estado === true) {
+
+          return await Proyecto.findByIdAndUpdate(
+            args.id,
+            {
+              estado: args.estado,
+              fase: args.fase,
+              fechaInicio: args.estado === true ? Date.now() : null,
+              fechaFin: args.fase === "Terminado" ? Date.now() : null
+            },
+            { new: true }
+          );
+        }
       } else {
         return null;
       }
@@ -136,16 +162,16 @@ export const resolvers = {
 
     async actualizarInfoProyecto(parent, args, context) {
       if (context.user.auth && context.user.rol === "Lider") {
-        return await Proyecto.findByIdAndUpdate(
-          args.id,
-          {
-            nombre: args.nombre,
-            objetivosG: args.objetivosG,
-            objetivosE: args.objetivosE,
-            presupuesto: args.presupuesto,
-          },
-          { new: true }
-        );
+      return await Proyecto.findByIdAndUpdate(
+        args.id,
+        {
+          nombre: args.nombre,
+          objetivosG: args.objetivosG,
+          objetivosE: args.objetivosE,
+          presupuesto: args.presupuesto,
+        },
+        { new: true }
+      );
       } else {
         return null;
       }
@@ -179,7 +205,7 @@ export const resolvers = {
       }
     },
 
-    async actualizarEstadoInscripcion(parent, args,context) {
+    async actualizarEstadoInscripcion(parent, args, context) {
       if (context.user.auth && context.user.rol === "Lider") {
         const inscripcion = await Inscripcion.findById(args.id);
 
@@ -225,10 +251,10 @@ export const resolvers = {
       if (context.user.auth) {
         if (context.user.rol === "Lider") {
           let { observaciones } = await Avance.findById(idAvance);
-           let inObservacion={
-             observacion:observacion,
-             fechaObservacion: Date.now()
-           }
+          let inObservacion = {
+            observacion: observacion,
+            fechaObservacion: Date.now()
+          }
           let nObservacion = [...observaciones, inObservacion];
           return await Avance.findByIdAndUpdate(
             idAvance,
@@ -258,32 +284,32 @@ export const resolvers = {
               idProyecto,
               { avances: nAvances },
               { new: true }
-              ).populate("avances");
-            }
-          } else {
-            return "No está autorizado para agregar avances";
+            ).populate("avances");
           }
         } else {
           return "No está autorizado para agregar avances";
         }
-      },
-      //Historia usuario 23
-      async actualizarAvance(_, { idAvance, avance }, context) {
-        if (context.user.auth) {
-          if (context.user.rol === "Estudiante") {
-            let inAvance = {
-              usuario_id: context.user.id,
-              fechaAvance: Date.now(),
-              avanceEstudiante: avance,
-            };
-            return await Avance.findByIdAndUpdate(idAvance, inAvance, { new: true });
-            
-          } else {
-            return "No está autorizado para agregar avances";
-          }
-        } else {
-          return "No está autorizado para agregar avances";
-        }
-      },
+      } else {
+        return "No está autorizado para agregar avances";
+      }
     },
+    //Historia usuario 23
+    async actualizarAvance(_, { idAvance, avance }, context) {
+      if (context.user.auth) {
+        if (context.user.rol === "Estudiante") {
+          let inAvance = {
+            usuario_id: context.user.id,
+            fechaAvance: Date.now(),
+            avanceEstudiante: avance,
+          };
+          return await Avance.findByIdAndUpdate(idAvance, inAvance, { new: true });
+
+        } else {
+          return "No está autorizado para agregar avances";
+        }
+      } else {
+        return "No está autorizado para agregar avances";
+      }
+    },
+  },
 };
