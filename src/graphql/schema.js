@@ -8,6 +8,7 @@ const typeDefs = `
         proyectos: [Proyecto],
         proyectoById(id: ID!): Proyecto,
         Inscripciones: [Inscripcion],
+        inscripcionById(id: ID!): Inscripcion,
         Usuarios: [Usuario],
         usuarioById(id: ID!): Usuario,
         informacionProyectoLider(id: ID!): Proyecto,
@@ -69,7 +70,7 @@ const typeDefs = `
     type Avance {
          id: ID,
          proyecto_id: ID,
-         usuario_id: ID,
+         usuario_id: Usuario,
          fechaAvance: String,
          avanceEstudiante: String,
          observaciones: [Observacion]   
@@ -101,8 +102,7 @@ const typeDefs = `
         email: String,
         cc: String,
         password: String,
-        rol: String,
-        estado: String
+        rol: String
     }
 
     input ProyectoInput {

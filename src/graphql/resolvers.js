@@ -87,6 +87,14 @@ export const resolvers = {
       }
     },
 
+    async inscripcionById(_, { id }, context) {
+      if (context.user.auth && context.user.rol === "Lider") {
+        return await Inscripcion.findById(id).populate("usuario_id").populate("proyecto_id");
+      } else {
+        return null;
+      }
+    },
+
     //Historia de usuario 17
 
     async informacionProyectoLider(_, { id }, context) {
@@ -104,15 +112,11 @@ export const resolvers = {
 
     //Historia usuario 23
     async listaAvances(_, { idProyecto }, context) {
-      if (context.user.auth) {
-        if (context.user.rol === "Estudiante") {
-          return await Avance.find({ proyecto_id: idProyecto });
+      if (context.user.auth && ((context.user.rol === "Estudiante") || (context.user.rol === "Lider"))) {
+          return await Avance.find({ proyecto_id: idProyecto }).populate("usuario_id");
         } else {
           return null;
         }
-      } else {
-        return null;
-      }
     },
   },
 
