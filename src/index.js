@@ -4,11 +4,14 @@ import {dbConnection} from './database/config';
 import schema from './graphql/schema';
 import { validarJwt } from './middleware/validar-jwt';
 import dotenv from "dotenv";
+import cors from 'cors';
 
 const app = express();
 dotenv.config();
 
 dbConnection();
+
+app.use(cors());
 
 app.use(validarJwt);
 
