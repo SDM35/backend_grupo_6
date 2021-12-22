@@ -113,10 +113,10 @@ export const resolvers = {
     //Historia usuario 23
     async listaAvances(_, { idProyecto }, context) {
       if (context.user.auth && ((context.user.rol === "Estudiante") || (context.user.rol === "Lider"))) {
-          return await Avance.find({ proyecto_id: idProyecto }).populate("usuario_id");
-        } else {
-          return null;
-        }
+        return await Avance.find({ proyecto_id: idProyecto }).populate("usuario_id");
+      } else {
+        return null;
+      }
     },
   },
 
@@ -144,54 +144,109 @@ export const resolvers = {
       }
     },
 
-    async actualizarEstadoProyecto(parent, args, context) {
-      if (context.user.auth && context.user.rol === "Administrador") {
-        if (args.estado === true) {
+    async actualizarInfoProyecto(parent, args, context) {
+      if (context.user.auth && (context.user.rol === "Administrador")) {
+        const proyecto = Proyecto.findById(args.id);
+        if ((args.estado === true) && (proyecto.fase = null)) {
 
           return await Proyecto.findByIdAndUpdate(
             args.id,
             {
               estado: args.estado,
-              fase: args.fase,
-              fechaInicio: args.estado === true ? Date.now() : null,
-              fechaFin: args.fase === "Terminado" ? Date.now() : null
+              fase: "Iniciado",
+              fechaInicio: Date.now()
             },
             { new: true }
           );
+
+        } else if (args.fase === "Terminado") {
+          return await Proyecto.findByIdAndUpdate(
+            args.id,
+            {
+              estado: false,
+              fase: "Terminado",
+              fechaFin: Date.now()
+            },
+            { new: true }
+          );
+
+        // } else if (proyecto.fase != "Terminado") {
+        //   return await Proyecto.findByIdAndUpdate(
+        //     args.id,
+        //     {
+        //       estado: args.estado
+        //     },
+        //     { new: true }
+        //   );
+
         }
+
+      } else if ((context.user.auth && (context.user.rol === "Lider"))) {
+        const proyecto = Proyecto.findById(args.id);
+        if (proyecto.fase !== "Terminado") {
+
+          return await Proyecto.findByIdAndUpdate(
+            args.id,
+            {
+              nombre: args.nombre,
+              objetivosG: args.objetivosG,
+              objetivosE: args.objetivosE,
+              presupuesto: args.presupuesto,
+              fase: args.fase
+            },
+            { new: true }
+          );
+
+        } else if (args.fase === "Terminado") {
+          return await Proyecto.findByIdAndUpdate(
+            args.id,
+            {
+              nombre: args.nombre,
+              objetivosG: args.objetivosG,
+              objetivosE: args.objetivosE,
+              presupuesto: args.presupuesto,
+              estado: false,
+              fase: "Terminado",
+              fechaFin: Date.now()
+            },
+            { new: true }
+          );
+
+        }
+
       } else {
         return null;
       }
     },
 
-    async actualizarInfoProyecto(parent, args, context) {
-      if (context.user.auth && context.user.rol === "Lider") {
-      return await Proyecto.findByIdAndUpdate(
-        args.id,
-        {
-          nombre: args.nombre,
-          objetivosG: args.objetivosG,
-          objetivosE: args.objetivosE,
-          presupuesto: args.presupuesto,
-        },
-        { new: true }
-      );
-      } else {
-        return null;
-      }
-    },
+    // async actualizarInfoProyecto(parent, args, context) {
+    //   if (context.user.auth && context.user.rol === "Lider") {
+    //   return await Proyecto.findByIdAndUpdate(
+    //     args.id,
+    //     {
+    //       nombre: args.nombre,
+    //       objetivosG: args.objetivosG,
+    //       objetivosE: args.objetivosE,
+    //       presupuesto: args.presupuesto,
+    //     },
+    //     { new: true }
+    //   );
+    //   } else {
+    //     return null;
+    //   }
+    // },
 
     async actualizarUsuario(parent, args, context) {
       if (context.user.auth) {
         const salt = bcrypt.genSaltSync();
+        args.password = bcrypt.hashSync(args.password, salt);
         return await Usuario.findByIdAndUpdate(
           args.id,
           {
             nombre: args.nombre,
-            email: args.email,
             cc: args.cc,
-            rol: args.rol,
-            
+            password: args.password
+
           },
           { new: true }
         );
@@ -217,6 +272,7 @@ export const resolvers = {
           args.id,
           {
             estado: args.estado,
+            fechaIngreso: Date.now()
           },
           { new: true }
         );
@@ -226,7 +282,7 @@ export const resolvers = {
     },
 
     async actualizarEstadoUser(parent, args, context) {
-      if (context.user.auth && (context.user.rol === "Administrador" || context.user.rol=="Lider")) {
+      if (context.user.auth && (context.user.rol === "Administrador" || context.user.rol == "Lider")) {
         return await Usuario.findByIdAndUpdate(
           args.id,
           { estado: args.estado },
@@ -236,20 +292,7 @@ export const resolvers = {
         return null;
       }
     },
-    async actualizarEstadoEstudiante(parent, args, context) {
-      if (context.user.auth && context.user.rol === "Lider") {
-        const estudiante = await Usuario.findById(args.id);
-        if (estudiante.rol === "Estudiante") {
-          return await Usuario.findByIdAndUpdate(
-            args.id,
-            { estado: args.estado },
-            { new: true }
-          );
-        } else {
-          return null;
-        }
-      }
-    },
+
     //Historia de usuario 18
     async agregarObservacion(_, { idAvance, observacion }, context) {
       if (context.user.auth) {
