@@ -13,6 +13,8 @@ dbConnection();
 
 app.use(cors());
 
+app.use(express.static('public'));
+
 app.use(validarJwt);
 
 app.listen(process.env.PORT || 4000, () => {

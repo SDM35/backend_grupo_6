@@ -14,8 +14,8 @@ const ProyectoSchema = Schema({
     },
   ],
   presupuesto: { type: Number, required: true },
-  fechaInicio: { type: String },
-  fechaFin: { type: String },
+  fechaInicio: { type: String, default: "" },
+  fechaFin: { type: String, default: "" },
   lider: {
     type: Schema.Types.ObjectId,
     ref: "Usuario",
