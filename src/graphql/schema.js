@@ -6,6 +6,7 @@ const typeDefs = `
     type Query {
         login(email: String!, password: String!): Auth,
         proyectos: [Proyecto],
+        misProyectos: [Proyecto],
         proyectoById(id: ID!): Proyecto,
         Inscripciones: [Inscripcion],
         inscripcionById(id: ID!): Inscripcion,

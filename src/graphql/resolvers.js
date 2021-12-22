@@ -29,7 +29,7 @@ export const resolvers = {
             nombre: usuario.nombre
           }
         } else {
-          return "Usuario o contraseña incorrecta";
+          throw new Error("Usuario o contraseña incorrecta");
         }
 
       } else {
@@ -47,6 +47,33 @@ export const resolvers = {
 
       } else if (context.user.auth && (context.user.rol === "Estudiante")) {
         return await Proyecto.find({ estado: true }).populate("lider");
+
+      } else {
+        return null;
+      }
+    },
+
+    async misProyectos(_, args, context) {
+      if (context.user.auth && (context.user.rol === "Estudiante")) {
+
+
+        const inscripcion = await Inscripcion.find({ usuario_id: context.user.id, estado: "Aceptada" });
+        let misP = [];
+        inscripcion.forEach(element => {
+          misP.push(Proyecto.findById(element.proyecto_id));
+
+        });
+
+        console.log(misP);
+
+        return misP;
+
+        // Inscripcion.find({ usuario_id: context.user.id, estado: "Aceptada" }).forEach(element => {
+        //   let misProyectos = Proyecto.findById(element.proyecto_id);
+        //   misProyectos = misProyectos.append(misProyectos)
+        // });
+
+        // console.log(this.misProyectos);
 
       } else {
         return null;
@@ -145,10 +172,9 @@ export const resolvers = {
     },
 
     async actualizarInfoProyecto(parent, args, context) {
-      if (context.user.auth && (context.user.rol === "Administrador")) {
-        const proyecto = Proyecto.findById(args.id);
-        if ((args.estado === true) && (proyecto.fase = null)) {
-
+      if (context.user.auth && context.user.rol === "Administrador") {
+        const proyecto = await Proyecto.findById(args.id);
+        if (args.estado === true && proyecto.fase === null) {
           return await Proyecto.findByIdAndUpdate(
             args.id,
             {
@@ -170,34 +196,21 @@ export const resolvers = {
             { new: true }
           );
 
-        // } else if (proyecto.fase != "Terminado") {
-        //   return await Proyecto.findByIdAndUpdate(
-        //     args.id,
-        //     {
-        //       estado: args.estado
-        //     },
-        //     { new: true }
-        //   );
-
-        }
-
-      } else if ((context.user.auth && (context.user.rol === "Lider"))) {
-        const proyecto = Proyecto.findById(args.id);
-        if (proyecto.fase !== "Terminado") {
-
+        } else if (args.fase != "Terminado") {
           return await Proyecto.findByIdAndUpdate(
             args.id,
             {
-              nombre: args.nombre,
-              objetivosG: args.objetivosG,
-              objetivosE: args.objetivosE,
-              presupuesto: args.presupuesto,
-              fase: args.fase
+              fase: args.fase,
+              estado: args.estado
             },
             { new: true }
           );
 
-        } else if (args.fase === "Terminado") {
+        }
+
+      } else if (context.user.auth && context.user.rol === "Lider") {
+        const proyecto = await Proyecto.findById(args.id);
+        if (args.fase === "Terminado") {
           return await Proyecto.findByIdAndUpdate(
             args.id,
             {
@@ -211,30 +224,23 @@ export const resolvers = {
             },
             { new: true }
           );
-
+        } else if (proyecto.fase != "Terminado") {
+          return await Proyecto.findByIdAndUpdate(args.id, {
+            nombre: args.nombre,
+            objetivosG: args.objetivosG,
+            objetivosE: args.objetivosE,
+            presupuesto: args.presupuesto,
+            estado: args.estado,
+            fase: args.fase
+          },
+            { new: true }
+          );
         }
 
       } else {
         return null;
       }
     },
-
-    // async actualizarInfoProyecto(parent, args, context) {
-    //   if (context.user.auth && context.user.rol === "Lider") {
-    //   return await Proyecto.findByIdAndUpdate(
-    //     args.id,
-    //     {
-    //       nombre: args.nombre,
-    //       objetivosG: args.objetivosG,
-    //       objetivosE: args.objetivosE,
-    //       presupuesto: args.presupuesto,
-    //     },
-    //     { new: true }
-    //   );
-    //   } else {
-    //     return null;
-    //   }
-    // },
 
     async actualizarUsuario(parent, args, context) {
       if (context.user.auth) {
@@ -257,8 +263,15 @@ export const resolvers = {
 
     async agregarInscripcion(parent, { input }, context) {
       if (context.user.auth && context.user.rol === "Estudiante") {
-        const inscripcion = new Inscripcion(input);
-        return await inscripcion.save();
+
+        const proyecto = await Proyecto.findById(input.proyecto_id);
+
+        if (proyecto.estado === true) {
+          const inscripcion = new Inscripcion(input);
+          return await inscripcion.save();
+        } else {
+          return null;
+        }
       } else {
         return null;
       }
@@ -313,8 +326,13 @@ export const resolvers = {
     },
     //Historia de usuario 22
     async agregarAvance(_, { idProyecto, avance }, context) {
-      if (context.user.auth) {
-        if (context.user.rol === "Estudiante") {
+      if (context.user.auth && context.user.rol === "Estudiante") {
+
+        const proyecto = await Proyecto.findById(idProyecto);
+        const inscripcion = await Inscripcion.findOne({ proyecto_id: idProyecto, estado: "Aceptada" });
+
+        if ((proyecto.estado === true) && (proyecto.fase != "Terminado") && (inscripcion)
+          && (inscripcion.fechaEgreso === "false")) {
           let inAvance = {
             proyecto_id: idProyecto,
             usuario_id: context.user.id,
@@ -329,7 +347,10 @@ export const resolvers = {
             let nAvances = [...avances, _id];
             return await Proyecto.findByIdAndUpdate(
               idProyecto,
-              { avances: nAvances },
+              {
+                avances: nAvances,
+                fase: "En desarrollo"
+              },
               { new: true }
             ).populate("avances");
           }
@@ -340,10 +361,17 @@ export const resolvers = {
         return "No está autorizado para agregar avances";
       }
     },
+
     //Historia usuario 23
     async actualizarAvance(_, { idAvance, avance }, context) {
-      if (context.user.auth) {
-        if (context.user.rol === "Estudiante") {
+      if (context.user.auth && context.user.rol === "Estudiante") {
+
+        const avance = await Avance.findById(idAvance);
+        const proyecto = await Proyecto.findById(avance.idProyecto);
+        const inscripcion = await Inscripcion.findOne({ proyecto_id: avance.idProyecto, estado: "Aceptada" });
+
+        if ((proyecto.estado === true) && (proyecto.fase != "Terminado") && (inscripcion)
+          && (inscripcion.fechaEgreso === "false")) {
           let inAvance = {
             usuario_id: context.user.id,
             fechaAvance: Date.now(),
