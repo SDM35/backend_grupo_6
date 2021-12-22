@@ -307,14 +307,15 @@ export const resolvers = {
     },
 
     //Historia de usuario 18
-    async agregarObservacion(_, { idAvance, observacion }, context) {
-      if (context.user.auth) {
-        if (context.user.rol === "Lider") {
+    async agregarObservacion(_, { idAvance, observacion, idProyecto }, context) {
+      if (context.user.auth && context.user.rol === "Lider") {
+        const proyecto = await Proyecto.findById(idProyecto);
+        if (proyecto.estado === true && proyecto.fase != "Terminado") {
           let { observaciones } = await Avance.findById(idAvance);
           let inObservacion = {
             observacion: observacion,
             fechaObservacion: Date.now()
-          }
+          };
           let nObservacion = [...observaciones, inObservacion];
           return await Avance.findByIdAndUpdate(
             idAvance,
@@ -365,13 +366,14 @@ export const resolvers = {
     //Historia usuario 23
     async actualizarAvance(_, { idAvance, avance }, context) {
       if (context.user.auth && context.user.rol === "Estudiante") {
-
         const avance = await Avance.findById(idAvance);
-        const proyecto = await Proyecto.findById(avance.idProyecto);
-        const inscripcion = await Inscripcion.findOne({ proyecto_id: avance.idProyecto, estado: "Aceptada" });
+        const proyecto = await Proyecto.findById(avance.proyecto_id);
+        const inscripcion = await Inscripcion.findOne({
+          proyecto_id: avance.proyecto_id,
+          estado: "Aceptada"
+        });
 
-        if ((proyecto.estado === true) && (proyecto.fase != "Terminado") && (inscripcion)
-          && (inscripcion.fechaEgreso === "false")) {
+        if ((proyecto.estado === true) && (proyecto.fase != "Terminado") && (inscripcion) && (inscripcion.fechaEgreso === "false")) {
           let inAvance = {
             usuario_id: context.user.id,
             fechaAvance: Date.now(),
